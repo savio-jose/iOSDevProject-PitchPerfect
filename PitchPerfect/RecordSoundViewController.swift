@@ -18,23 +18,17 @@ class RecordSoundViewController: UIViewController, AVAudioRecorderDelegate {
     
     var audioRecorder: AVAudioRecorder!
     
+    // raw values correspond to sender tags
+    enum RecordingState { case Recording, NotRecording }
+    
     struct Segue {
         static let PlaySound = "playSound"
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        
-        stopRecordingBtn.enabled = false
-    }
-
 
     @IBAction func startRecording(sender: AnyObject) {
         
-        startRecordingBtn.enabled = false
-        stopRecordingBtn.enabled = true
-        recordingLbl.text = "Recording in Progress"
+        configureUI(.Recording)
         
         let dirPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory,.UserDomainMask, true)[0] as String
         let recordingName = "recordedVoice.wav"
@@ -57,14 +51,31 @@ class RecordSoundViewController: UIViewController, AVAudioRecorderDelegate {
     
     @IBAction func stopRecording(sender: AnyObject) {
         
-        stopRecordingBtn.enabled = false
-        startRecordingBtn.enabled = true
-        
-        recordingLbl.text = "Tap to Record"
+        configureUI(.NotRecording)
         
         audioRecorder.stop()
         let session = AVAudioSession.sharedInstance()
         try! session.setActive(false)
+        
+    }
+
+    
+    func configureUI(recordState: RecordingState) {
+        switch(recordState) {
+        case .Recording:
+            updateRecordingButtonState(true)
+            recordingLbl.text = "Recording in Progress"
+        case .NotRecording:
+            updateRecordingButtonState(false)
+            recordingLbl.text = "Tap to Record"
+        }
+    }
+    
+    
+    func updateRecordingButtonState(isRecording: Bool){
+        
+        stopRecordingBtn.enabled = isRecording
+        startRecordingBtn.enabled = !isRecording
         
     }
     
